@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Doctors{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Search Doctors</h2>
+    <p class="text-muted">Find the right doctor for your needs</p>
+
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('patient.search_doctors') }}">
+                <div class="row">
+                    <div class="col-md-5">
+                        <input type="text" 
+                               name="search" 
+                               class="form-control" 
+                               placeholder="Search by doctor name"
+                               value="{{ search_query }}">
+                    </div>
+                    <div class="col-md-5">
+                        <select name="specialization" class="form-select">
+                            <option value="">All Specializations</option>
+                            {% for spec in specializations %}
+                            <option value="{{ spec }}" {% if selected_specialization == spec %}selected{% endif %}>
+                                {{ spec }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    {% if doctors %}
+    <h4>{{ doctors|length }} Doctor(s) Found</h4>
+    <div class="row mt-3">
+        {% for doctor in doctors %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Dr. {{ doctor.name }}</h5>
+                    <p class="card-text">
+                        <strong>Specialization:</strong> {{ doctor.specialization }}<br>
+                        <strong>Email:</strong> {{ doctor.email }}<br>
+                        <strong>Phone:</strong> {{ doctor.phone }}
+                    </p>
+                    <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" 
+                       class="btn btn-success">Book Appointment</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> 
+        {% if search_query or selected_specialization %}
+            No doctors found matching your search criteria. Try different filters.
+        {% else %}
+            Start searching for doctors using the form above.
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{{ url_for('patient.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
