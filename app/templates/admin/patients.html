@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}View Patients - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">View Patients</h2>
+    
+    <!-- Search Bar -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('admin.patients') }}">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" placeholder="Search by name, phone, or email" value="{{ search }}">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                    {% if search %}
+                    <a href="{{ url_for('admin.patients') }}" class="btn btn-secondary">Clear</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Patients Table -->
+    <div class="card">
+        <div class="card-body">
+            {% if patients %}
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>DOB</th>
+                        <th>Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td>{{ patient.id }}</td>
+                        <td>{{ patient.name }}</td>
+                        <td>{{ patient.user.email }}</td>
+                        <td>{{ patient.phone }}</td>
+                        <td>{{ patient.dob.strftime('%Y-%m-%d') if patient.dob else 'N/A' }}</td>
+                        <td>{{ patient.address[:50] }}...</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-center text-muted">No patients found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
