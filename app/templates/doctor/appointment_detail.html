@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointment Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Appointment Details</h2>
+            
+            <!-- Appointment Information Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Appointment #{{ appointment.id }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Patient Name:</strong> {{ appointment.patient.name }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Date:</strong> {{ appointment.appointment_date.strftime('%d %b %Y') }}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Time:</strong> {{ appointment.appointment_time.strftime('%I:%M %p') }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Status:</strong>
+                            <span class="badge 
+                                {% if appointment.status == 'Booked' %}bg-warning
+                                {% elif appointment.status == 'Completed' %}bg-success
+                                {% elif appointment.status == 'Cancelled' %}bg-danger
+                                {% endif %}">
+                                {{ appointment.status }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Patient Email:</strong> {{ appointment.patient.email }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Patient Phone:</strong> {{ appointment.patient.phone }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Treatment Form (Only if Booked) -->
+            {% if appointment.status == 'Booked' %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5>Complete Appointment & Add Treatment</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('doctor.complete_appointment', id=appointment.id) }}">
+                        <div class="mb-3">
+                            <label for="diagnosis" class="form-label">Diagnosis *</label>
+                            <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="prescription" class="form-label">Prescription</label>
+                            <textarea class="form-control" id="prescription" name="prescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">Save & Mark Complete</button>
+                        <a href="{{ url_for('doctor.appointments') }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                This appointment has been {{ appointment.status.lower() }}.
+            </div>
+            {% endif %}
+
+            <!-- Patient Treatment History -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Patient Treatment History</h5>
+                </div>
+                <div class="card-body">
+                    {% if treatments %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Doctor</th>
+                                    <th>Diagnosis</th>
+                                    <th>Prescription</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for treatment in treatments %}
+                                <tr>
+                                    <td>{{ treatment.appointment.appointment_date.strftime('%d %b %Y') }}</td>
+                                    <td>Dr. {{ treatment.appointment.doctor.name }}</td>
+                                    <td>{{ treatment.diagnosis }}</td>
+                                    <td>{{ treatment.prescription or 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No previous treatment history for this patient.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('doctor.appointments') }}" class="btn btn-primary btn-block mb-2">Back to Appointments</a>
+                    <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-info btn-block">Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
