@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Treatment History{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Treatment History</h2>
+    <p class="text-muted">Your medical records</p>
+    {% if treatments %}
+    <div class="accordion" id="acc">
+        {% for t in treatments %}
+        <div class="accordion-item mb-2">
+            <h2 class="accordion-header">
+                <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" 
+                        type="button" data-bs-toggle="collapse" data-bs-target="#c{{t.id}}">
+                    {{t.appointment.appointment_date.strftime('%d %b %Y')}} - Dr. {{t.appointment.doctor.name}}
+                </button>
+            </h2>
+            <div id="c{{t.id}}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}">
+                <div class="accordion-body">
+                    <p><strong>Diagnosis:</strong> {{t.diagnosis}}</p>
+                    {% if t.prescription %}<p><strong>Prescription:</strong> {{t.prescription}}</p>{% endif %}
+                    {% if t.notes %}<p><strong>Notes:</strong> {{t.notes}}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">No treatment history yet.</div>
+    {% endif %}
+    <div class="mt-4">
+        <a href="{{url_for('patient.dashboard')}}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+{% endblock %}
