@@ -20,6 +20,17 @@
                     {% if current_user.is_authenticated %}
                         <li class="nav-item">
                             <span class="nav-link">Welcome, {{ current_user.email }}</span>
+                                                    </li>
+                        <li class="nav-item">
+                            {% if current_user.role == 'Admin' %}
+                            <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+                            {% elif current_user.role == 'Doctor' %}
+                            <a class="nav-link" href="{{ url_for('doctor.dashboard') }}">Doctor Dashboard</a>
+                            {% elif current_user.role == 'Patient' %}
+                            <a class="nav-link" href="{{ url_for('patient.dashboard') }}">Patient Dashboard</a>
+                            {% endif %}
+                        </li>
+                        <li class="nav-item">
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
