@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>My Profile</h2>
+    
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Update Profile Information</h5>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" value="{{ patient.name }}" disabled>
+                    <small class="text-muted">Name cannot be changed</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" value="{{ current_user.email }}" disabled>
+                    <small class="text-muted">Email cannot be changed</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="contact" class="form-label">Contact Number *</label>
+                    <input type="text" class="form-control" id="contact" name="contact" value="{{ patient.contact }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address *</label>
+                    <textarea class="form-control" id="address" name="address" rows="3" required>{{ patient.address }}</textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+                <a href="{{ url_for('patient.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
