@@ -256,3 +256,25 @@ def history():
     ).order_by(Appointment.appointment_date.desc()).all()
     
     return render_template('patient/history.html', treatments=treatments)
+
+@bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+@patient_required
+def profile():
+    patient = Patient.query.filter_by(user_id=current_user.id).first()
+    
+    if request.method == 'POST':
+        # Update patient information
+        contact = request.form.get('contact')
+        address = request.form.get('address')
+        
+        if contact:
+            patient.contact = contact
+        if address:
+            patient.address = address
+        
+        db.session.commit()
+        flash('Profile updated successfully.', 'success')
+        return redirect(url_for('patient.profile'))
+    
+    return render_template('patient/profile.html', patient=patient)
