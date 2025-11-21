@@ -243,10 +243,10 @@ def reschedule_appointment(id):
                          appointment=appointment,
                          reschedule=True)
 
-@bp.route('/treatment-history')
+@bp.route('/history')
 @login_required
 @patient_required
-def treatment_history():
+def history():
     patient = Patient.query.filter_by(user_id=current_user.id).first()
     
     # Get all completed appointments with treatments
@@ -255,4 +255,4 @@ def treatment_history():
         Appointment.status == 'Completed'
     ).order_by(Appointment.appointment_date.desc()).all()
     
-    return render_template('patient/treatment_history.html', treatments=treatments)
+    return render_template('patient/history.html', treatments=treatments)
