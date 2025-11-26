@@ -31,3 +31,6 @@ def create_app():
     app.register_blueprint(patient.bp)
     
     return app
+
+# Create default app instance for WSGI servers
+app = create_app()
