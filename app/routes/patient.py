@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
-from app.models import Doctor, Appointment, Patient, Treatment
+from app.models import Doctor, Appointment, Patient, Treatment, Availability
 from app import db
 from datetime import datetime, date, time
 from functools import wraps
@@ -281,3 +281,20 @@ def profile():
         return redirect(url_for('patient.profile'))
     
     return render_template('patient/profile.html', patient=patient)
+
+@bp.route('/doctor/<int:doctor_id>', methods=['GET'])
+@login_required
+@patient_required
+def view_doctor(doctor_id):
+    """View doctor profile and available slots"""
+    doctor = Doctor.query.get_or_404(doctor_id)
+    
+    # Get doctor availability for next 7 days
+    today = date.today()
+    week_end = today + timedelta(days=6)
+    availabilities = Availability.query.filter_by(doctor_id=doctor_id, is_available=True).filter(
+        Availability.date >= today,
+        Availability.date <= week_end
+    ).order_by(Availability.date, Availability.start_time).all()
+    
+    return render_template('patient/doctor_profile.html', doctor=doctor, availabilities=availabilities)
