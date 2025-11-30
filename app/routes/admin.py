@@ -47,11 +47,11 @@ def doctors():
     
     if search:
         # Search by name, specialization, or contact
-        doctors = Doctor.query.join(User).filter(
+doctors = Doctor.query.join(User).filter(
             (Doctor.name.contains(search)) |
-            (Doctor.phone.contains(search)) |
-            (Specialization.query.join(Doctor).filter(Specialization.name.contains(search))      ).all()
-    else:
+            (Doctor.phone.contains(search))
+        ).all()
+        else:
         doctors = Doctor.query.all()
     
     return render_template('admin/doctors.html', doctors=doctors, search=search)
