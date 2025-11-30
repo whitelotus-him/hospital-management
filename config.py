@@ -4,7 +4,21 @@ from datetime import timedelta
 class Config:
     """Base configuration"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///instance/hospital.db'
+    import os
+from datetime import timedelta
+
+class Config:
+    """Base configuration"""
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    
+    # Fixed database URI
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        f'sqlite:///{os.path.join(basedir, "instance", "hospital.db")}'
+    
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # ... rest of config ...
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Session Configuration
