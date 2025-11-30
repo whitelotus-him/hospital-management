@@ -46,6 +46,10 @@ def dashboard():
         Appointment.appointment_date,
         Appointment.appointment_time
     ).limit(5).all()
+
+        # Get all specializations
+    from app.models import Specialization
+    specializations = Specialization.query.all()
     
     stats = {
         'total': total_appointments,
@@ -53,7 +57,7 @@ def dashboard():
         'completed': completed_appointments
     }
     
-    return render_template('patient/dashboard.html', stats=stats, upcoming=upcoming)
+    return render_template('patient/dashboard.html', stats=stats, upcoming=upcoming), specializations=specializations
 
 @bp.route('/search-doctors')
 @login_required
@@ -70,13 +74,13 @@ def search_doctors():
         query = query.filter(Doctor.name.contains(search_query))
     
     if specialization:
-        query = query.filter(Doctor.specialization == specialization)
-    
+        from app.models import Specialization
+        query = query.join(Specialization).filter(Specialization.id == int(specialization))    
     doctors = query.all()
     
     # Get all unique specializations for filter dropdown
-    specializations = db.session.query(Doctor.specialization).distinct().all()
-    specializations = [s[0] for s in specializations]
+    from app.models import Specialization
+    ] for s in specializations]
     
     return render_template('patient/search_doctors.html', 
                          doctors=doctors, 
