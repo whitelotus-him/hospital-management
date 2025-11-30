@@ -78,7 +78,7 @@ def search_doctors():
     doctors = query.all()
     
     # Get all unique specializations for filter dropdown
-    from app.models import Specializatioon
+    from app.models import Specialization
         specializations = Specialization.query.all()
     
     return render_template('patient/search_doctors.html', 
@@ -272,7 +272,7 @@ def profile():
         address = request.form.get('address')
         
         if contact:
-            patient.contact = contact
+            patient.phone = contact
         if address:
             patient.address = address
         
