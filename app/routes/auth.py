@@ -22,11 +22,10 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         
         # Check if user exists and password is correct
-        if user and check_password_hash(user.password, form.password.data):
-            # Log the user in
+        if user and user.check_password(form.password.data):            # Log the user in
             login_user(user)
             flash('Login successful!', 'success')
-            
+            user.check_password(form.password.data)
             # Redirect to page they were trying to access, or home
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('home.index'))
