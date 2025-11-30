@@ -21,7 +21,7 @@ def create_app():
     login_manager.login_view = 'auth.login'
     
     # Register blueprints (routes)
-    from app.routes import home, auth, admin, doctor, patient, specialization
+    from app.routes import home, auth, admin, doctor, patient, specialization, availability
     # from app.routes import admin, doctor, patient, auth  # Will add these later
     
     app.register_blueprint(home.bp)
@@ -30,5 +30,6 @@ def create_app():
     app.register_blueprint(doctor.bp)
     app.register_blueprint(patient.bp)
     app.register_blueprint(specialization.bp)
+    app.register_blueprint(availability.bp)
     
     return app
