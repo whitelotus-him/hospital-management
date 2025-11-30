@@ -147,13 +147,13 @@ def availability():
     doctor = Doctor.query.filter_by(user_id=current_user.id).first()
     
     if request.method == 'POST':
-        day_of_week = request.form.get('day_of_week')
+        date = request.form.get('date')
         start_time = request.form.get('start_time')
         end_time = request.form.get('end_time')
         
         availability = Availability(
             doctor_id=doctor.id,
-            day_of_week=day_of_week,
+            date=date,
             start_time=datetime.strptime(start_time, '%H:%M').time() if start_time else None,
             end_time=datetime.strptime(end_time, '%H:%M').time() if end_time else None
         )
