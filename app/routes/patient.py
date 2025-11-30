@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app.models import Doctor, Appointment, Patient, Treatment, Availability, Specialization
 from app import db
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 from functools import wraps
 
 # Create patient blueprint
@@ -56,7 +56,7 @@ def dashboard():
         'completed': completed_appointments
     }
     
-    return render_template('patient/dashboard.html', stats=stats, upcoming=upcoming), specializations=specializations
+    return render_template('patient/dashboard.html', stats=stats, upcoming=upcoming, specializations=specializations)
 
 @bp.route('/search-doctors')
 @login_required
@@ -78,8 +78,8 @@ def search_doctors():
     doctors = query.all()
     
     # Get all unique specializations for filter dropdown
-    from app.models import Specialization
-    ] for s in specializations]
+    from app.models import Specializatioon
+        specializations = Specialization.query.all()
     
     return render_template('patient/search_doctors.html', 
                          doctors=doctors, 
