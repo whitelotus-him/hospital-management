@@ -65,7 +65,9 @@ def add_doctor():
         name = request.form.get('name')
         email = request.form.get('email')
         phone = request.form.get('phone')
-        specialization_id = request.form.get('specialization')        experience = request.form.get('experience')
+        specialization_id = request.form.get('specialization')        exspecializations = Specialization.query.al        specializations = Specialization.query.all()
+        
+        return render_template('admin/doctor_form.html', doctor=None, specializations=specializations)
         password = request.form.get('password')
         
         # Check if email already exists
@@ -97,7 +99,7 @@ def add_doctor():
         flash(f'Doctor {name} added successfully!', 'success')
         return redirect(url_for('admin.doctors'))
     
-    return render_template('admin/doctor_form.html', doctor=None)
+    return render_template('admin/doctor_fdoctor=None, specializations=Specialization.query.all())
 
 @bp.route('/doctor/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -109,6 +111,7 @@ def edit_doctor(id):
         doctor.name = request.form.get('name')
         doctor.phone = request.form.get('phone')
         doctor.specialization_id = int(request.form.get('specialization'))        experience = request.form.get('experience')
+                doctor.experience = int(experience) if experience else 0
 
 
         @bp.route('/patient/add', methods=['GET', 'POST'])
