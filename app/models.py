@@ -50,7 +50,7 @@ class Doctor(db.Model):
     specialization_id = db.Column(db.Integer, db.ForeignKey('specializations.id'), nullable=False)
     phone = db.Column(db.String(15))
     bio = db.Column(db.Text)
-        experience = db.Column(db.Integer, nullable=True)
+    experience = db.Column(db.Integer, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     
     appointments = db.relationship('Appointment', backref='doctor', lazy=True)
@@ -72,7 +72,7 @@ class Availability(db.Model):
     __tablename__ = 'availability'
     id = db.Column(db.Integer, primary_key=True)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
-        date = db.Column(db.Date, nullable=False)  # Date-based for next 7 days
+    date = db.Column(db.Date, nullable=False)  # Date-based for next 7 days
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
     is_available = db.Column(db.Boolean, default=True)
