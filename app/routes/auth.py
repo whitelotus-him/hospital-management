@@ -25,7 +25,6 @@ def login():
         if user and user.check_password(form.password.data):            # Log the user in
             login_user(user)
             flash('Login successful!', 'success')
-            user.check_password(form.password.data)
             # Redirect to page they were trying to access, or home
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('home.index'))
