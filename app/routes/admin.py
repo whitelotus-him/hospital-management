@@ -1,3 +1,4 @@
+# app/routes/admin.py
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from functools import wraps
@@ -5,10 +6,8 @@ from app import db
 from app.models import User, Admin, Doctor, Patient, Appointment, Specialization
 from datetime import datetime
 
-# Create admin blueprint
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-# Decorator to restrict access to admin only
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -22,13 +21,10 @@ def admin_required(f):
 @login_required
 @admin_required
 def dashboard():
-    # Get statistics for dashboard
     total_doctors = Doctor.query.count()
     total_patients = Patient.query.count()
     total_appointments = Appointment.query.count()
     pending_appointments = Appointment.query.filter_by(status='Booked').count()
-    
-    # Get recent appointments
     recent_appointments = Appointment.query.order_by(Appointment.appointment_date.desc()).limit(5).all()
     
     return render_template('admin/dashboard.html',
@@ -42,16 +38,14 @@ def dashboard():
 @login_required
 @admin_required
 def doctors():
-    # Get search query if any
     search = request.args.get('search', '')
-    
     if search:
-        # Search by name, specialization, or contact
-doctors = Doctor.query.join(User).filter(
+        doctors = Doctor.query.join(Specialization).filter(
             (Doctor.name.contains(search)) |
-            (Doctor.phone.contains(search))
+            (Doctor.phone.contains(search)) |
+            (Specialization.name.contains(search))
         ).all()
-        else:
+    else:
         doctors = Doctor.query.all()
     
     return render_template('admin/doctors.html', doctors=doctors, search=search)
@@ -60,48 +54,42 @@ doctors = Doctor.query.join(User).filter(
 @login_required
 @admin_required
 def add_doctor():
+    specializations = Specialization.query.all()
+    
     if request.method == 'POST':
-        # Get form data
         name = request.form.get('name')
         email = request.form.get('email')
         phone = request.form.get('phone')
         specialization_id = request.form.get('specialization')
-    experience = request.form.get('experience')
-    
-    # Get all specializations for GET requests
-    specializations = Specialization.query.all()
-        
+        experience = request.form.get('experience')
         password = request.form.get('password')
         
-        # Check if email already exists
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
             flash('Email already registered!', 'danger')
             return redirect(url_for('admin.add_doctor'))
         
-        # Create user account
         from werkzeug.security import generate_password_hash
         new_user = User(
             email=email,
-            password=generate_password_hash(password),
+            password_hash=generate_password_hash(password),
             role='doctor'
         )
         db.session.add(new_user)
         db.session.flush()
         
-        # Create doctor profile
         new_doctor = Doctor(
             user_id=new_user.id,
             name=name,
             phone=phone,
-            specialization_id=int(specialization_id),            experience=int(experience) if experience else 0
+            specialization_id=int(specialization_id),
+            experience=int(experience) if experience else 0
         )
         db.session.add(new_doctor)
         db.session.commit()
         
         flash(f'Doctor {name} added successfully!', 'success')
         return redirect(url_for('admin.doctors'))
-    return render_template('admin/doctor_form.html', doctor=None, specializations=specializations)
     
     return render_template('admin/doctor_form.html', doctor=None, specializations=specializations)
 
@@ -110,15 +98,61 @@ def add_doctor():
 @admin_required
 def edit_doctor(id):
     doctor = Doctor.query.get_or_404(id)
+    specializations = Specialization.query.all()
     
     if request.method == 'POST':
         doctor.name = request.form.get('name')
         doctor.phone = request.form.get('phone')
-        doctor.specialization_id = int(request.form.get('specialization'))        experience = request.form.get('experience')
-                doctor.experience = int(experience) if experience else 0
+        doctor.specialization_id = int(request.form.get('specialization'))
+        experience = request.form.get('experience')
+        doctor.experience = int(experience) if experience else 0
+        
+        new_email = request.form.get('email')
+        if new_email != doctor.user.email:
+            existing = User.query.filter_by(email=new_email).first()
+            if existing:
+                flash('Email already in use!', 'danger')
+                return redirect(url_for('admin.edit_doctor', id=id))
+            doctor.user.email = new_email
+        
+        db.session.commit()
+        flash(f'Doctor {doctor.name} updated successfully!', 'success')
+        return redirect(url_for('admin.doctors'))
+    
+    return render_template('admin/doctor_form.html', doctor=doctor, specializations=specializations)
 
+@bp.route('/doctor/delete/<int:id>')
+@login_required
+@admin_required
+def delete_doctor(id):
+    doctor = Doctor.query.get_or_404(id)
+    user = doctor.user
+    
+    db.session.delete(doctor)
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash(f'Doctor {doctor.name} deleted successfully!', 'success')
+    return redirect(url_for('admin.doctors'))
 
-        @bp.route('/patient/add', methods=['GET', 'POST'])
+@bp.route('/patients')
+@login_required
+@admin_required
+def patients():
+    search = request.args.get('search', '')
+    
+    if search:
+        patients = Patient.query.join(User).filter(
+            (Patient.name.contains(search)) |
+            (Patient.phone.contains(search)) |
+            (User.email.contains(search))
+        ).all()
+    else:
+        patients = Patient.query.all()
+    
+    return render_template('admin/patients.html', patients=patients, search=search)
+
+@bp.route('/patient/add', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def add_patient():
@@ -139,7 +173,7 @@ def add_patient():
         from werkzeug.security import generate_password_hash
         new_user = User(
             email=email,
-            password=generate_password_hash(password),
+            password_hash=generate_password_hash(password),
             role='patient'
         )
         db.session.add(new_user)
@@ -218,53 +252,3 @@ def appointments():
         appointments = Appointment.query.all()
     
     return render_template('admin/appointments.html', appointments=appointments, search=search)
-        doctor.experience = int(experience) if experience else 0
-        
-        # Update email if changed
-        new_email = request.form.get('email')
-        if new_email != doctor.user.email:
-            existing = User.query.filter_by(email=new_email).first()
-            if existing:
-                flash('Email already in use!', 'danger')
-                return redirect(url_for('admin.edit_doctor', id=id))
-            doctor.user.email = new_email
-        
-        db.session.commit()
-        flash(f'Doctor {doctor.name} updated successfully!', 'success')
-        return redirect(url_for('admin.doctors'))
-    
-    return render_template('admin/doctor_form.html', doctor=doctor)
-
-@bp.route('/doctor/delete/<int:id>')
-@login_required
-@admin_required
-def delete_doctor(id):
-    doctor = Doctor.query.get_or_404(id)
-    user = doctor.user
-    
-    # Delete doctor and associated user
-    db.session.delete(doctor)
-    db.session.delete(user)
-    db.session.commit()
-    
-    flash(f'Doctor {doctor.name} deleted successfully!', 'success')
-    return redirect(url_for('admin.doctors'))
-
-@bp.route('/patients')
-@login_required
-@admin_required
-def patients():
-    # Get search query if any
-    search = request.args.get('search', '')
-    
-    if search:
-        # Search by name, phone, or email
-        patients = Patient.query.join(User).filter(
-            (Patient.name.contains(search)) |
-            (Patient.phone.contains(search)) |
-            (User.email.contains(search))
-        ).all()
-    else:
-        patients = Patient.query.all()
-    
-    return render_template('admin/patients.html', patients=patients, search=search)
