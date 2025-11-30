@@ -59,7 +59,7 @@ def register():
             user_id=new_user.id,
             name=form.name.data,
             phone=form.phone.data,
-            dob=form.dob.data,
+            date_of_birth=form.date_of_birth.data,
             address=form.address.data
         )
         db.session.add(new_patient)
