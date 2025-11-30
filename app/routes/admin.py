@@ -50,8 +50,7 @@ def doctors():
         doctors = Doctor.query.join(User).filter(
             (Doctor.name.contains(search)) |
             (Doctor.phone.contains(search)) |
-            (Doctor.specialization.contains(search))
-        ).all()
+            (Specialization.query.join(Doctor).filter(Specialization.name.contains(search))      ).all()
     else:
         doctors = Doctor.query.all()
     
@@ -66,8 +65,7 @@ def add_doctor():
         name = request.form.get('name')
         email = request.form.get('email')
         phone = request.form.get('phone')
-        specialization = request.form.get('specialization')
-        experience = request.form.get('experience')
+        specialization_id = request.form.get('specialization')        experience = request.form.get('experience')
         password = request.form.get('password')
         
         # Check if email already exists
@@ -91,8 +89,7 @@ def add_doctor():
             user_id=new_user.id,
             name=name,
             phone=phone,
-            specialization=specialization,
-            experience=int(experience) if experience else 0
+            specialization_id=int(specialization_id),            experience=int(experience) if experience else 0
         )
         db.session.add(new_doctor)
         db.session.commit()
@@ -111,8 +108,109 @@ def edit_doctor(id):
     if request.method == 'POST':
         doctor.name = request.form.get('name')
         doctor.phone = request.form.get('phone')
-        doctor.specialization = request.form.get('specialization')
-        experience = request.form.get('experience')
+        doctor.specialization_id = int(request.form.get('specialization'))        experience = request.form.get('experience')
+
+
+        @bp.route('/patient/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_patient():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        date_of_birth = request.form.get('date_of_birth')
+        address = request.form.get('address')
+        medical_history = request.form.get('medical_history')
+        password = request.form.get('password')
+        
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash('Email already registered!', 'danger')
+            return redirect(url_for('admin.add_patient'))
+        
+        from werkzeug.security import generate_password_hash
+        new_user = User(
+            email=email,
+            password=generate_password_hash(password),
+            role='patient'
+        )
+        db.session.add(new_user)
+        db.session.flush()
+        
+        new_patient = Patient(
+            user_id=new_user.id,
+            name=name,
+            phone=phone,
+            date_of_birth=datetime.strptime(date_of_birth, '%Y-%m-%d').date() if date_of_birth else None,
+            address=address,
+            medical_history=medical_history
+        )
+        db.session.add(new_patient)
+        db.session.commit()
+        
+        flash(f'Patient {name} added successfully!', 'success')
+        return redirect(url_for('admin.patients'))
+    
+    return render_template('admin/patient_form.html', patient=None)
+
+@bp.route('/patient/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_patient(id):
+    patient = Patient.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        patient.name = request.form.get('name')
+        patient.phone = request.form.get('phone')
+        date_of_birth = request.form.get('date_of_birth')
+        patient.date_of_birth = datetime.strptime(date_of_birth, '%Y-%m-%d').date() if date_of_birth else None
+        patient.address = request.form.get('address')
+        patient.medical_history = request.form.get('medical_history')
+        
+        new_email = request.form.get('email')
+        if new_email != patient.user.email:
+            existing = User.query.filter_by(email=new_email).first()
+            if existing:
+                flash('Email already in use!', 'danger')
+                return redirect(url_for('admin.edit_patient', id=id))
+            patient.user.email = new_email
+        
+        db.session.commit()
+        flash(f'Patient {patient.name} updated successfully!', 'success')
+        return redirect(url_for('admin.patients'))
+    
+    return render_template('admin/patient_form.html', patient=patient)
+
+@bp.route('/patient/delete/<int:id>')
+@login_required
+@admin_required
+def delete_patient(id):
+    patient = Patient.query.get_or_404(id)
+    user = patient.user
+    
+    db.session.delete(patient)
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash(f'Patient {patient.name} deleted successfully!', 'success')
+    return redirect(url_for('admin.patients'))
+
+@bp.route('/appointments')
+@login_required
+@admin_required
+def appointments():
+    search = request.args.get('search', '')
+    
+    if search:
+        appointments = Appointment.query.join(Patient).join(Doctor).filter(
+            (Patient.name.contains(search)) |
+            (Doctor.name.contains(search))
+        ).all()
+    else:
+        appointments = Appointment.query.all()
+    
+    return render_template('admin/appointments.html', appointments=appointments, search=search)
         doctor.experience = int(experience) if experience else 0
         
         # Update email if changed
