@@ -50,6 +50,7 @@ class Doctor(db.Model):
     specialization_id = db.Column(db.Integer, db.ForeignKey('specializations.id'), nullable=False)
     phone = db.Column(db.String(15))
     bio = db.Column(db.Text)
+        experience = db.Column(db.Integer, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     
     appointments = db.relationship('Appointment', backref='doctor', lazy=True)
