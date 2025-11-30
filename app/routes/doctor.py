@@ -120,6 +120,70 @@ def complete_appointment(id):
     flash(f'Appointment marked as completed and treatment recorded.', 'success')
     return redirect(url_for('doctor.appointments'))
 
+@bp.route('/appointment/<int:id>/cancel', methods=['POST'])
+@login_required
+@doctor_required
+def cancel_appointment(id):
+    doctor = Doctor.query.filter_by(user_id=current_user.id).first()
+    appointment = Appointment.query.get_or_404(id)
+    
+    if appointment.doctor_id != doctor.id:
+        flash('Unauthorized action.', 'danger')
+        return redirect(url_for('doctor.appointments'))
+    
+    reason = request.form.get('reason', 'Cancelled by doctor')
+    appointment.status = 'Cancelled'
+    
+    db.session.commit()
+    
+    flash(f'Appointment cancelled: {reason}', 'info')
+    return redirect(url_for('doctor.appointments'))
+
+@bp.route('/availability', methods=['GET', 'POST'])
+@login_required
+@doctor_required
+def availability():
+    from app.models import Availability
+    doctor = Doctor.query.filter_by(user_id=current_user.id).first()
+    
+    if request.method == 'POST':
+        day_of_week = request.form.get('day_of_week')
+        start_time = request.form.get('start_time')
+        end_time = request.form.get('end_time')
+        
+        availability = Availability(
+            doctor_id=doctor.id,
+            day_of_week=day_of_week,
+            start_time=datetime.strptime(start_time, '%H:%M').time() if start_time else None,
+            end_time=datetime.strptime(end_time, '%H:%M').time() if end_time else None
+        )
+        db.session.add(availability)
+        db.session.commit()
+        
+        flash('Availability added successfully!', 'success')
+        return redirect(url_for('doctor.availability'))
+    
+    availabilities = Availability.query.filter_by(doctor_id=doctor.id).all()
+    return render_template('doctor/availability.html', availabilities=availabilities)
+
+@bp.route('/availability/delete/<int:id>')
+@login_required
+@doctor_required
+def delete_availability(id):
+    from app.models import Availability
+    doctor = Doctor.query.filter_by(user_id=current_user.id).first()
+    availability = Availability.query.get_or_404(id)
+    
+    if availability.doctor_id != doctor.id:
+        flash('Unauthorized action.', 'danger')
+        return redirect(url_for('doctor.availability'))
+    
+    db.session.delete(availability)
+    db.session.commit()
+    
+    flash('Availability deleted.', 'success')
+    return redirect(url_for('doctor.availability'))
+
 @bp.route('/patients')
 @login_required
 @doctor_required
