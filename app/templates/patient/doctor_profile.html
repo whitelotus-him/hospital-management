@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-4">
+      <!-- Doctor Profile Card -->
+      <div class="card">
+        <div class="card-body text-center">
+          <h3>{{ doctor.user.name }}</h3>
+          <p class="text-muted">{{ doctor.specialization.name }}</p>
+          <p><strong>Experience:</strong> {{ doctor.experience or 'N/A' }} years</p>
+          <p><strong>Bio:</strong> {{ doctor.bio or 'No bio available' }}</p>
+          <hr>
+          <a href="#" class="btn btn-sm btn-primary">Book Appointment</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-8">
+      <!-- Available Slots -->
+      <div class="card">
+        <div class="card-header">
+          <h5>Available Slots (Next 7 Days)</h5>
+        </div>
+        <div class="card-body">
+          {% if availabilities %}
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for slot in availabilities %}
+                    <tr>
+                      <td>{{ slot.date.strftime('%a, %b %d') }}</td>
+                      <td>{{ slot.start_time }}</td>
+                      <td>{{ slot.end_time }}</td>
+                      <td>
+                        <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id, slot_id=slot.id) }}" class="btn btn-sm btn-success">Book</a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="alert alert-warning" role="alert">
+              No available slots for the next 7 days. Please check back later.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
