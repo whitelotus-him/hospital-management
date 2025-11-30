@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
-from app.models import Doctor, Appointment, Patient, Treatment, Availability
+from app.models import Doctor, Appointment, Patient, Treatment, Availability, Specialization
 from app import db
 from datetime import datetime, date, time
 from functools import wraps
@@ -298,3 +298,27 @@ def view_doctor(doctor_id):
     ).order_by(Availability.date, Availability.start_time).all()
     
     return render_template('patient/doctor_profile.html', doctor=doctor, availabilities=availabilities)
+
+@bp.route('/search', methods=['GET', 'POST'])
+@login_required
+@patient_required
+def search_by_specialization():
+    """Search doctors by specialization"""
+    specializations = Specialization.query.all()
+    doctors = []
+    selected_spec_id = None
+    
+    if request.method == 'POST':
+        spec_id = request.form.get('specialization_id')
+        if spec_id:
+            selected_spec_id = int(spec_id)
+            doctors = Doctor.query.filter_by(specialization_id=selected_spec_id).all()
+    elif request.args.get('spec_id'):
+        spec_id = request.args.get('spec_id')
+        selected_spec_id = int(spec_id)
+        doctors = Doctor.query.filter_by(specialization_id=selected_spec_id).all()
+    
+    return render_template('patient/search_results.html', 
+                         specializations=specializations, 
+                         doctors=doctors, 
+                         selected_spec_id=selected_spec_id)
