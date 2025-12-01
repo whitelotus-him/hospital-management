@@ -14,8 +14,7 @@ def doctor_required(f):
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role != 'doctor':
             flash('You need doctor privileges to access this page.', 'danger')
-            return redirect(url_for('home.index'))
-        return f(*args, **kwargs)
+            return redirect(url_for('home.home'))
     return decorated_function
 
 @bp.route('/dashboard')
