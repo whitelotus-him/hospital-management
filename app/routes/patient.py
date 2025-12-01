@@ -46,8 +46,6 @@ def dashboard():
     ).limit(5).all()
 
         # Get all specializations
-    from app.models import Specialization
-    specializations = Specialization.query.all()
     
     stats = {
         'total': total_appointments,
@@ -72,12 +70,10 @@ def search_doctors():
         query = query.filter(Doctor.name.contains(search_query))
     
     if specialization:
-        from app.models import Specialization
         query = query.join(Specialization).filter(Specialization.id == int(specialization))    
     doctors = query.all()
     
     # Get all unique specializations for filter dropdown
-    from app.models import Specialization
         specializations = Specialization.query.all()
     
     return render_template('patient/search_doctors.html', 
