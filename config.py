@@ -11,9 +11,6 @@ class Config:
         f'sqlite:///{os.path.join(basedir, "instance", "hospital.db")}'
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    # ... rest of config ...
-
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Session Configuration
     PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
@@ -35,8 +32,6 @@ class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
     TESTING = False
-    SESSION_COOKIE_SECURE = True
-    # In production, force HTTPS
     SESSION_COOKIE_SECURE = True
 
 class TestingConfig(Config):
