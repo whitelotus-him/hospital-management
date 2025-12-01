@@ -14,10 +14,9 @@ def patient_required(f):
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
             return redirect(url_for('auth.login'))
-        if current_user.role != 'patient':            flash('Access denied. Patients only.', 'danger')
-            return redirect(url_for('home.index'))
-        return f(*args, **kwargs)
-    return decorated_function
+                if current_user.role != 'patient':
+                                flash('Access denied. Patients only.', 'danger')
+            return redirect(url_for('home.home'))
 
 @bp.route('/dashboard')
 @login_required
