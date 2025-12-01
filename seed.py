@@ -16,10 +16,10 @@ with app.app_context():
         # Create admin User account
         admin_user = User(
             email='admin@hospital.com',
-            password=generate_password_hash('admin123'),
-            role='admin'
+                        role='admin'
         )
         db.session.add(admin_user)
+            admin_user.set_password('admin123')
         db.session.flush()  # Get the user ID
         
         # Create Admin profile
