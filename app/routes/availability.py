@@ -22,8 +22,7 @@ def manage_availability():
     doctor = Doctor.query.filter_by(user_id=current_user.id).first()
     if not doctor:
         flash('Doctor profile not found', 'danger')
-        return redirect(url_for('home.index'))
-    
+            return redirect(url_for('home.home'))    
     if request.method == 'POST':
         date = request.form.get('date')
         start_time = request.form.get('start_time')
@@ -86,7 +85,7 @@ def delete_availability(id):
     
     if availability.doctor_id != doctor.id:
         flash('Access denied', 'danger')
-        return redirect(url_for('home.index'))
+        return redirect(url_for('home.home'))
     
     try:
         db.session.delete(availability)
