@@ -12,8 +12,7 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 def login():
     # If user is already logged in, redirect to their dashboard
     if current_user.is_authenticated:
-        return redirect(url_for('home.index'))
-    
+            return redirect(url_for('home.home'))    
     form = LoginForm()
     
     # When form is submitted and valid
@@ -27,9 +26,7 @@ def login():
             flash('Login successful!', 'success')
             # Redirect to page they were trying to access, or home
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('home.index'))
-        else:
-            flash('Invalid email or password', 'danger')
+        return redirect(next_page) if next_page else redirect(url_for('home.home'))
     
     return render_template('auth/login.html', form=form)
 
@@ -37,8 +34,7 @@ def login():
 def register():
     # If already logged in, redirect to home
     if current_user.is_authenticated:
-        return redirect(url_for('home.index'))
-    
+            return redirect(url_for('home.home'))    
     form = PatientRegisterForm()
     
     if form.validate_on_submit():
